@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ken Stewart | Home Loan Scenario Estimator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f5f5f5;
+    }
+    .wrapper {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 24px 16px 40px;
+    }
+    .card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+    }
+    h1 {
+      font-size: 1.6rem;
+      margin-top: 0;
+      margin-bottom: 4px;
+    }
+    h2 {
+      font-size: 1.1rem;
+      margin-top: 24px;
+      margin-bottom: 8px;
+    }
+    p {
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: #444;
+      margin-top: 4px;
+      margin-bottom: 8px;
+    }
+    .subtle {
+      font-size: 0.8rem;
+      color: #777;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px 16px;
+      margin-top: 12px;
+    }
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    input {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 0.9rem;
+      box-sizing: border-box;
+    }
+    input:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 1px #2563eb33;
+    }
+    .btn {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 10px 18px;
+      border-radius: 999px;
+      border: none;
+      background: #2563eb;
+      color: white;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn:active {
+      transform: translateY(1px);
+    }
+    .results {
+      margin-top: 20px;
+      padding: 16px;
+      border-radius: 12px;
+      background: #f1f5f9;
+    }
+    .results-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      font-size: 0.95rem;
+    }
+    .results-row strong {
+      font-weight: 600;
+    }
+    .cta-box {
+      margin-top: 20px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      background: #ecfdf5;
+      border: 1px solid #bbf7d0;
+      font-size: 0.9rem;
+    }
+    .footer {
+      margin-top: 16px;
+      font-size: 0.8rem;
+      color: #777;
+      text-align: center;
+    }
+    a.cta-link {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 8px 16px;
+      border-radius: 999px;
+      background: #16a34a;
+      color: #fff;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="card">
+      <h1>Home Loan Scenario Estimator</h1>
+      <p>
+        This tool gives you a <strong>rough estimate</strong> of a monthly payment based on a purchase price, 
+        down payment, rate and taxes. For an accurate CalHFA or other loan scenario and a full
+        pre-approval, reach out to me directly and I’ll run the real numbers for you.
+      </p>
+      <p class="subtle">
+        Estimates only. Not a commitment to lend or an official pre-approval. Rates and guidelines change.
+      </p>
+
+      <h2>1. Basic scenario</h2>
+      <div class="grid">
+        <div>
+          <label>Home price ($)</label>
+          <input type="number" id="price" placeholder="500000" />
+        </div>
+        <div>
+          <label>Down payment (%)</label>
+          <input type="number" id="downPct" placeholder="3" />
+        </div>
+        <div>
+          <label>Interest rate (%)</label>
+          <input type="number" id="rate" placeholder="6.75" step="0.01" />
+        </div>
+        <div>
+          <label>Loan term (years)</label>
+          <input type="number" id="years" placeholder="30" />
+        </div>
+      </div>
+
+      <h2>2. Taxes, insurance & HOA</h2>
+      <div class="grid">
+        <div>
+          <label>Property tax (% of price / year)</label>
+          <input type="number" id="taxPct" placeholder="1.25" step="0.01" />
+        </div>
+        <div>
+          <label>Homeowners insurance ($/month)</label>
+          <input type="number" id="ins" placeholder="80" />
+        </div>
+        <div>
+          <label>HOA dues ($/month, if any)</label>
+          <input type="number" id="hoa" placeholder="0" />
+        </div>
+      </div>
+
+      <button class="btn" onclick="calculate()">Estimate Payment</button>
+
+      <div class="results" id="results" style="display:none;">
+        <div class="results-row">
+          <span>Estimated loan amount:</span>
+          <strong id="loanAmountOut"></strong>
+        </div>
+        <div class="results-row">
+          <span>Principal &amp; interest (P&amp;I):</span>
+          <strong id="piOut"></strong>
+        </div>
+        <div class="results-row">
+          <span>Estimated taxes &amp; insurance:</span>
+          <strong id="tiOut"></strong>
+        </div>
+        <div class="results-row">
+          <span>HOA (if any):</span>
+          <strong id="hoaOut"></strong>
+        </div>
+        <hr />
+        <div class="results-row">
+          <span><strong>Estimated total monthly payment:</strong></span>
+          <strong id="totalOut"></strong>
+        </div>
+      </div>
+
+      <div class="cta-box">
+        <strong>Next step:</strong>  
+        Once you have a scenario you like, send it to me and I’ll help you figure out which
+        programs (including CalHFA) you may qualify for and what a full pre-approval looks like.
+        <br />
+        <a class="cta-link" id="emailLink" href="#">
+          Email this scenario to Ken
+        </a>
+      </div>
+
+      <div class="footer">
+        Ken Stewart, Loan Officer | American Pacific Mortgage  
+        NMLS #226014 | NMLS #2726790 | Ken.stewart@apmortgage.com  
+        Equal Housing Opportunity. Estimates only; subject to credit approval and program guidelines.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function formatMoney(num) {
+      if (isNaN(num)) return "$0";
+      return num.toLocaleString("en-US", {
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 0
+      });
+    }
+
+    function calculate() {
+      const price = parseFloat(document.getElementById("price").value || 0);
+      const downPct = parseFloat(document.getElementById("downPct").value || 0);
+      const rate = parseFloat(document.getElementById("rate").value || 0);
+      const years = parseFloat(document.getElementById("years").value || 30);
+      const taxPct = parseFloat(document.getElementById("taxPct").value || 0);
+      const ins = parseFloat(document.getElementById("ins").value || 0);
+      const hoa = parseFloat(document.getElementById("hoa").value || 0);
+
+      const downPayment = price * (downPct / 100);
+      const loanAmount = price - downPayment;
+
+      const monthlyRate = rate / 100 / 12;
+      const n = years * 12;
+
+      let pi = 0;
+      if (monthlyRate > 0 && n > 0) {
+        pi = loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, n)) /
+             (Math.pow(1 + monthlyRate, n) - 1);
+      }
+
+      const yearlyTax = price * (taxPct / 100);
+      const monthlyTax = yearlyTax / 12;
+      const ti = monthlyTax + ins;
+      const total = pi + ti + hoa;
+
+      document.getElementById("loanAmountOut").textContent = formatMoney(loanAmount);
+      document.getElementById("piOut").textContent = formatMoney(pi);
+      document.getElementById("tiOut").textContent = formatMoney(ti);
+      document.getElementById("hoaOut").textContent = formatMoney(hoa);
+      document.getElementById("totalOut").textContent = formatMoney(total);
+      document.getElementById("results").style.display = "block";
+
+      const subject = encodeURIComponent("Home Loan Scenario for Ken");
+      const body = encodeURIComponent(
+        "Here is the scenario I ran on your estimator:\n\n" +
+        "Home price: " + formatMoney(price) + "\n" +
+        "Down payment: " + downPct + "%\n" +
+        "Interest rate: " + rate + "%\n" +
+        "Term: " + years + " years\n" +
+        "Property tax: " + taxPct + "% per year\n" +
+        "Insurance: " + formatMoney(ins) + " / month\n" +
+        "HOA: " + formatMoney(hoa) + " / month\n\n" +
+        "Estimated loan amount: " + formatMoney(loanAmount) + "\n" +
+        "Estimated P&I: " + formatMoney(pi) + "\n" +
+        "Estimated taxes + insurance: " + formatMoney(ti) + "\n" +
+        "Estimated total monthly payment: " + formatMoney(total) + "\n\n" +
+        "Please reach out and let me know what I might qualify for and what the next steps are for pre-approval."
+      );
+      document.getElementById("emailLink").href =
+        "mailto:Ken.stewart@apmortgage.com?subject=" + subject + "&body=" + body;
+    }
+  </script>
+</body>
+</html>
